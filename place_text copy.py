@@ -1,11 +1,6 @@
-
-from xml.etree import ElementTree as et
-from xml.etree.ElementTree import tostring
-from textwrap import wrap
-
-
+import svgwrite
 import sys
-
+import base64
 from utils import log
 
 
@@ -22,13 +17,6 @@ RATIOS = {
         'size': '50px',
         'init': (300, 298)
     }
-}
-
-START = {
-    1: '298',
-    2: '265',
-    3: '230',
-    4: '200'
 }
 
 
@@ -53,41 +41,24 @@ def generate(sentence, name_file, path):
     
     lsen = len(sentence)
     ratio = get_ratio(lsen)
-    lines = wrap(sentence, 18)
+    new_sent = break_sentence(lsen, sentence)
     
     log.info(f'2/4 Creating {name_file} file')
-
-    doc = et.Element('svg', width='841.89', height='596.27559', version='1.2', xmlns='http://www.w3.org/2000/svg')
+    drw = svgwrite.Drawing(name_file, profile='tiny')
     
     # Append background
-    et.SubElement(doc, 'image', href=path + '/background.png', width='841.89', height='596.27559')
+    drw.add(svgwrite.image.Image(path + '/background.png', insert=(0,0), size=(841.89, 596.27559)))
 
-    # Create text area an add line
-    text = et.Element('text',
-                        x='421',
-                        y=START[len(lines)],
-                        width='841.89', 
-                        height='596.27559',
-                        fill='#595959',
-                        style='font-family:Montserrat;font-size:50px;text-anchor:middle;dominant-baseline:top')
-    
-    
-    
-    dy = 0
-    for line in lines:
-        t = et.Element('tspan',
-            x='421',
-            dy = str(dy),
-            fill='#595959',
-            style='font-family:Montserrat;font-size:50px;text-anchor:middle;dominant-baseline:top; font-weight:bold')
-        t.text = line
-        text.append(
-            t
-        )
-        if dy == 0:
-            dy += 70
-    doc.append(text)
-    return doc
+    # Adding text
+    drw.add(drw.text(new_sent,
+        insert=ratio['init'],
+        fill='#595959',
+        font_size=ratio['size'],
+        font_weight="bold",
+        font_family="Montserrat",
+        text_anchor="middle")
+    )
+    return drw
 
 # ------------------------------------
 #  Procedures to adapt
@@ -101,6 +72,24 @@ def get_ratio(s_len):
     else:
         return RATIOS['inf']
 
+def break_sentence(s_len, sentence):
+    if s_len <= 18:
+        return sentence
+    else:
+        words = sentence.split(' ')
+        final_sentence = ''
+        i = 0
+        for w in words:
+            i += len(w)
+            if i + len(w) <= 18:
+                i += len(w)
+                final_sentence += ' ' + w
+            else:
+                i = len(w)
+                final_sentence += '\n ' + w
+    return final_sentence
+
+
 # -----------------------------------
 #  I/O Procedures
 # -----------------------------------
@@ -112,12 +101,7 @@ def read_file(path):
 
 def save_file(path, image, name_file):
     log.info(f'4/4 Saving image: {name_file}')
-    with open(name_file, 'w') as f:
-        f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
-        f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
-        f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
-        f.write(tostring(image, encoding="unicode"))
-    return True
+    image.save(path + '/' + name_file)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,6 @@
 Hola
 que tal 
 muy bien
+esta es una frase medio larga
+esta es una frase muy muy muy muy muy muy muy larga
+1234 6789 122 3354

@@ -105,3 +105,21 @@ venv.bak/
 
 
 *.svg
+
+
+    drw.add(svgwrite.text.TextArea(
+        text=new_sent,
+        insert=ratio['init'],
+        fill='#595959',
+        font_size=ratio['size'],
+        font_weight="bold",
+        font_family="Montserrat",
+        text_anchor="middle")
+    )
+
+        text = et.Element('text',
+                        x='421',
+                        y='298',
+                        fill='#595959',
+                        style='font-family:Montserrat;font-size:66px;text-anchor:middle;dominant-baseline:top')
+    
