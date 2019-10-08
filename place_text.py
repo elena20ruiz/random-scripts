@@ -1,6 +1,9 @@
 
 from xml.etree import ElementTree as et
 from xml.etree.ElementTree import tostring
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPDF
+
 from textwrap import wrap
 
 
@@ -43,7 +46,7 @@ def run(path, sentences_file):
     for sentence in sentences:
         log.info(f'1/4 Reading sentence: {sentence}')
 
-        name_file = 'output_' + str(i) + '.svg'
+        name_file = 'output_' + str(i)
         image = generate(sentence, name_file, path)
         save_file(path, image, name_file)
         i += 1
@@ -112,11 +115,14 @@ def read_file(path):
 
 def save_file(path, image, name_file):
     log.info(f'4/4 Saving image: {name_file}')
-    with open(name_file, 'w') as f:
+    with open(name_file + '.svg', 'w') as f:
         f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
         f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
         f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
         f.write(tostring(image, encoding="unicode"))
+
+    drawing = svg2rlg(name_file + '.svg')
+    renderPDF.drawToFile(drawing, name_file + '.pdf')
     return True
 
 
